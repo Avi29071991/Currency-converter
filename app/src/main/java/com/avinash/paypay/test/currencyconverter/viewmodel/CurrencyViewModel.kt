@@ -7,12 +7,10 @@ import com.avinash.paypay.test.currencyconverter.database.CurrencyEntity
 import com.avinash.paypay.test.currencyconverter.viewintent.CurrencyIntent
 import com.avinash.paypay.test.currencyconverter.viewstate.CurrencyState
 import com.avinash.paypay.test.currencykotlin.datasource.CurrencyDataSource
-import com.avinash.paypay.test.currencykotlin.model.CurrencyData
 import com.avinash.paypay.test.currencykotlin.model.CurrencyResult
 import com.avinash.paypay.test.currencykotlin.model.LiveRatesCurrencyModel
 import com.avinash.paypay.test.foundation.logging.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -37,8 +35,8 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
      */
     override suspend fun handleIntents(intent: CurrencyIntent) {
         when (intent) {
-            is CurrencyIntent.FetchSupportedCurrency -> {
-                fetchSupportedCountries()
+            is CurrencyIntent.DisplayCurrencyList -> {
+                displayCurrencyList()
             }
 
             is CurrencyIntent.FetchLiveCurrencyRate -> {
@@ -76,23 +74,14 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
     /**
      * Provides supported country currency list either from database if available OR from API
      */
-    private fun fetchSupportedCountries() {
-        viewModelScope.launch(Dispatchers.Default) {
+    private fun displayCurrencyList() {
+        viewModelScope.launch {
             val currencies = currencyDao.allCurrencies()
-            if (currencies.firstOrNull()?.currencyName.isNullOrBlank()) {
-                    CurrencyDataSource.fetchSupportedCurrencies { result ->
-                        if (result is CurrencyResult.Value) {
-                            // process success
-                            updateCurrencies(data = result.data?.currencyList)
-                        }
-                    }
-            } else {
-                updateLiveData(
-                    CurrencyState.DisplaySupportedCurrency(
-                        currencyData = currencies
-                    )
+            updateLiveData(
+                CurrencyState.DisplaySupportedCurrency(
+                    currencyData = currencies
                 )
-            }
+            )
         }
     }
 
@@ -101,12 +90,37 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
      * either from database (if available) OR from API
      */
     private fun fetchLiveCurrencyRates() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             if (currencyDao.allCurrencies().isNullOrEmpty()) {
                     CurrencyDataSource.fetchLiveRateForSourceCurrency { result ->
+                        // process success result
                         if (result is CurrencyResult.Value) {
-                            // process success
+                            // Save currencies in database
                             saveCurrencies(data = result.data)
+
+                            // Update currency converter screen with below data for first launch
+                            if (selectedCurrency == null) {
+                                result.data?.currencyQuotes?.firstOrNull()?.let {
+                                    selectedCurrency = CurrencyEntity(
+                                        currencyCode =  it.currencyCode,
+                                        currencyValue = it.currencyRate.toDouble()
+                                    )
+                                }
+                            }
+
+                            result.data?.currencyQuotes?.firstOrNull { it.currencyCode == USD_CURRENCY }?.let {
+                                sourceCurrency = CurrencyEntity(
+                                    currencyCode =  it.currencyCode,
+                                    currencyValue = it.currencyRate.toDouble()
+                                )
+                            }
+
+                            updateLiveData(
+                                CurrencyState.DisplayCurrencyConverter(
+                                    selectedCurrency = selectedCurrency,
+                                    sourceCurrency = sourceCurrency
+                                )
+                            )
                         }
                     }
             } else {
@@ -120,7 +134,7 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
      * @param data list of currencies which needs to be stored in our database
      */
     private fun saveCurrencies(data: LiveRatesCurrencyModel?) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             val currencies = data?.currencyQuotes?.map {
                 CurrencyEntity(
                     currencyCode = it.currencyCode,
@@ -132,32 +146,6 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
             if (!currencies.isNullOrEmpty()) {
                 currencyDao.insertCurrencies(currencies = currencies)
             }
-
-            dispatchIntent(CurrencyIntent.DisplayCurrencyConverters)
-        }
-    }
-
-    /**
-     * Updates list of currencies in our database with its country name
-     * @param data list of currencies with country name which needs to be updated
-     */
-    private fun updateCurrencies(data: List<CurrencyData>?) {
-        if (!data.isNullOrEmpty()) {
-            viewModelScope.launch(Dispatchers.Default) {
-                data.forEach {
-                    currencyDao.updateCurrency(
-                        name = it.currencyCountryName,
-                        code = it.currencyCode
-                    )
-                }
-
-                val currencies = currencyDao.allCurrencies()
-                updateLiveData(
-                    CurrencyState.DisplaySupportedCurrency(
-                        currencyData = currencies
-                    )
-                )
-            }
         }
     }
 
@@ -165,12 +153,12 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
      * Perform necessary task to set up currency converter tiles on converter screen
      */
     private fun displayCurrencyConverter() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             if (selectedCurrency == null) {
                 selectedCurrency = currencyDao.allCurrencies().firstOrNull()
             }
 
-            sourceCurrency = currencyDao.allCurrencies().firstOrNull { it.currencyCode == "USD" }
+            sourceCurrency = currencyDao.allCurrencies().firstOrNull { it.currencyCode == USD_CURRENCY }
 
             updateLiveData(
                 CurrencyState.DisplayCurrencyConverter(
@@ -187,6 +175,7 @@ class CurrencyViewModel @Inject constructor(private val currencyDao: CurrencyDao
     }
 
     companion object {
+        private const val USD_CURRENCY = "USD"
         private val decimalFormatter by lazy {
             val numberFormatter = NumberFormat.getNumberInstance(Locale.US)
             numberFormatter.maximumFractionDigits = 2

@@ -1,98 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <ProgressBar android:id="@+id/progress_circular"
+    <ProgressBar
+        android:id="@+id/progress_circular"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="visible"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout android:id="@+id/currency_container"
+    <RelativeLayout
+        android:id="@+id/currency_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:visibility="gone">
 
         <TextView
+            android:id="@+id/app_version"
+            style="@style/TextAppearance.AppCompat.Medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/TextAppearance.AppCompat.Medium"
-            android:padding="@dimen/standard_padding"
-            android:text="@string/message_text" />
+            android:layout_alignParentBottom="true"
+            android:padding="@dimen/standard_padding" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@drawable/custom_border"
-            android:layout_margin="@dimen/standard_padding"
-            android:weightSum="10">
-
-            <EditText android:id="@+id/selected_currency_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/standard_padding"
-                android:inputType="number"
-                android:layout_weight="7"
-                android:hint="@string/hint_text"
-                android:importantForAutofill="no" />
+            android:layout_above="@id/app_version"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/selected_currency_code"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:padding="@dimen/standard_padding"
-                android:background="@color/purple_700"
-                android:textColor="@color/white"
-                android:textAlignment="center"
-                android:textAllCaps="true"
-                android:layout_weight="3"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.AppCompat.Medium"
-            android:padding="@dimen/standard_padding"
-            android:layout_marginTop="@dimen/standard_padding"
-            android:text="@string/converted_amount_message" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@drawable/custom_border"
-            android:layout_margin="@dimen/standard_padding"
-            android:weightSum="10">
-
-            <TextView android:id="@+id/source_currency_value"
                 style="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/black"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/standard_padding"
-                android:layout_weight="7" />
+                android:text="@string/message_text" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/standard_padding"
+                android:background="@drawable/custom_border"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/selected_currency_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:hint="@string/hint_text"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:padding="@dimen/standard_padding" />
+
+                <TextView
+                    android:id="@+id/selected_currency_code"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:background="@color/purple_700"
+                    android:padding="@dimen/standard_padding"
+                    android:textAlignment="center"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/source_currency_code"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:id="@+id/conversion_rate"
+                style="@style/TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="@dimen/standard_padding"
-                android:background="@color/purple_700"
-                android:textColor="@color/white"
-                android:textAlignment="center"
-                android:textAllCaps="true"
-                android:layout_weight="3"/>
+                android:text="@string/converted_amount_message" />
 
+            <TextView
+                style="@style/TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_margin"
+                android:padding="@dimen/standard_padding"
+                android:text="@string/converted_amount_message" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/standard_padding"
+                android:background="@drawable/custom_border"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <TextView
+                    android:id="@+id/source_currency_value"
+                    style="@style/TextAppearance.AppCompat.Medium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:padding="@dimen/standard_padding"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/source_currency_code"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:background="@color/purple_700"
+                    android:padding="@dimen/standard_padding"
+                    android:textAlignment="center"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
         </LinearLayout>
+    </RelativeLayout>
 
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

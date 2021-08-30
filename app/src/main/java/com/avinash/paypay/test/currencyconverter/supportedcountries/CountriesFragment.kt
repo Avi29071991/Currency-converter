@@ -32,7 +32,7 @@ class CountriesFragment: IBaseFragment<FragmentCountrySelectionBinding,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.dispatchIntent(CurrencyIntent.FetchSupportedCurrency)
+        viewModel.dispatchIntent(CurrencyIntent.DisplayCurrencyList)
     }
 
     /**
@@ -42,6 +42,7 @@ class CountriesFragment: IBaseFragment<FragmentCountrySelectionBinding,
     private fun initAdapter(currencyList: List<CurrencyEntity>?) {
         if (!currencyList.isNullOrEmpty()) {
             viewBinding.countryList.adapter = CurrencyAdapter(
+                context = requireContext(),
                 currencies = currencyList,
                 listener = object : CurrencyAdapter.OnItemClickListener {
                     override fun onClick(item: CurrencyEntity) {
@@ -51,9 +52,6 @@ class CountriesFragment: IBaseFragment<FragmentCountrySelectionBinding,
                     }
                 }
             )
-
-            viewBinding.countryList.visibility = View.VISIBLE
-            viewBinding.progressCircular.visibility = View.GONE
         }
     }
 

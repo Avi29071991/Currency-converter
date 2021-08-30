@@ -42,6 +42,9 @@ class CurrencyWorker @AssistedInject constructor(
         return Result.success()
     }
 
+    /**
+     * Saves currency data in existing database
+     */
     private fun saveData(data: LiveRatesCurrencyModel?) {
         coroutineScope.launch {
             Log.debug("Saving currency data from Worker class")
@@ -51,9 +54,8 @@ class CurrencyWorker @AssistedInject constructor(
                     currencyValue = it.currencyRate.toDouble()
                 )
             }
-
             currencyDao.deleteCurrencies()
-            if (!currencies.isNullOrEmpty()) {
+            if(!currencies.isNullOrEmpty()) {
                 currencyDao.insertCurrencies(currencies = currencies)
             }
         }

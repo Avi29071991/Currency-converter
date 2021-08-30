@@ -12,9 +12,9 @@ sealed class CurrencyIntent: ViewIntent {
 
     /**
      * Action used to fetch supported currency list and display it to the user on screen
-     * This list will either be fetched from API OR Database(if available)
+     * This list will either be fetched from Database
      */
-    object FetchSupportedCurrency: CurrencyIntent()
+    object DisplayCurrencyList: CurrencyIntent()
 
     /**
      * Action used to fetch currency live rate list which will help us to convert one currency to USD

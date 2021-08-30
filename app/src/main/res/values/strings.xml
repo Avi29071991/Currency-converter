@@ -3,4 +3,7 @@
     <string name="message_text">Tap on currency code below to change it</string>
     <string name="hint_text">Enter amount to convert</string>
     <string name="converted_amount_message">Converted amount in US Dollars</string>
+    <string name="equivalent_amount_message">1 USD = %s</string>
+    <string name="conversion_text">Conversion rate is %s</string>
+    <string name="app_version_text">App version: %s</string>
 </resources>

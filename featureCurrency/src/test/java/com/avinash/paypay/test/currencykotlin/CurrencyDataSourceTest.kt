@@ -49,28 +49,6 @@ class CurrencyDataSourceTest {
         lock.await(1, TimeUnit.SECONDS)
     }
 
-    @Test
-    fun testSupportedCurrencies() {
-        initStubs()
-
-        CurrencyDataSource.fetchSupportedCurrencies { result ->
-            if (result is CurrencyResult.Error) {
-                fail("Currency Live rates API should not fail")
-            }
-
-            if (result is CurrencyResult.Value) {
-                assertNotNull(result.data)
-                assertEquals(26, result.data?.currencyList?.size)
-                val firstElement = result.data?.currencyList?.get(0)
-                assertEquals("\"United Arab Emirates Dirham\"", firstElement?.currencyCountryName)
-                assertEquals("AED", firstElement?.currencyCode)
-                lock.countDown()
-            }
-        }
-
-        lock.await(1, TimeUnit.SECONDS)
-    }
-
     private fun initStubs() {
         val dispatcher: Dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -79,13 +57,6 @@ class CurrencyDataSourceTest {
                         MockResponse()
                             .setResponseCode(200)
                             .setBody(Stubs.LIVE_RATES.getResponse())
-                            .addHeader("Content-Type", "application/json")
-                    }
-
-                    "/list?access_key=3087c27f7666ae9ecfa67d6225a5a4e3" -> {
-                        MockResponse()
-                            .setResponseCode(200)
-                            .setBody(Stubs.SUPPORTED_CURRENCIES.getResponse())
                             .addHeader("Content-Type", "application/json")
                     }
 

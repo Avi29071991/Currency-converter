@@ -1,8 +1,10 @@
 package com.avinash.paypay.test.currencyconverter.supportedcountries.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.avinash.paypay.test.currencyconverter.R
 import com.avinash.paypay.test.currencyconverter.database.CurrencyEntity
 import com.avinash.paypay.test.currencyconverter.databinding.CurrencyRowBinding
 
@@ -10,6 +12,7 @@ import com.avinash.paypay.test.currencyconverter.databinding.CurrencyRowBinding
  * Adapter class used to display list of currencies for supported countries
  */
 class CurrencyAdapter(
+    private val context: Context,
     private val currencies: List<CurrencyEntity>,
     private val listener: OnItemClickListener
 ) : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
@@ -45,12 +48,8 @@ class CurrencyAdapter(
         with(holder) {
             with(currencies[position]) {
                 binding.currencyCode.text = this.currencyCode
-                if (!this.currencyName.isNullOrBlank()) {
-                    binding.currenyName.text = this.currencyName
-                }
-
                 if (this.currencyValue != null) {
-                    binding.currenyValue.text = this.currencyValue.toString()
+                    binding.currenyName.text = context.resources.getString(R.string.conversion_text, this.currencyValue.toString())
                 }
 
                 binding.root.setOnClickListener {

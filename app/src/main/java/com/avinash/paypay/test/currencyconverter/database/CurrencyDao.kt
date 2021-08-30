@@ -28,14 +28,6 @@ interface CurrencyDao {
     suspend fun insertCurrencies(currencies: List<CurrencyEntity>)
 
     /**
-     * Updates the currency name value for provided currency code in our database
-     * @param name Name of the country to which the currency belongs
-     * @param code Name of the currency code corresponding to which the data needs to be updated
-     */
-    @Query("UPDATE CurrencyEntity SET currencyName=:name WHERE currencyCode = :code")
-    suspend fun updateCurrency(name: String, code: String)
-
-    /**
      * Deletes a single record of mentioned currency from our database
      * @param currency [CurrencyEntity] record which needs to be deleted
      */

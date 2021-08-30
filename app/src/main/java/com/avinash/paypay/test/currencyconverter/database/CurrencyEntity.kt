@@ -10,6 +10,5 @@ import androidx.room.PrimaryKey
 data class CurrencyEntity(
     @PrimaryKey
     val currencyCode: String,
-    val currencyValue: Double? = null,
-    val currencyName: String? = null
+    val currencyValue: Double? = null
 )

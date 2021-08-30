@@ -10,6 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.avinash.paypay.test.currencyconverter.R
 import com.avinash.paypay.test.currencyconverter.base.IBaseFragment
 import com.avinash.paypay.test.currencyconverter.database.CurrencyEntity
@@ -17,6 +23,9 @@ import com.avinash.paypay.test.currencyconverter.databinding.FragmentHomeBinding
 import com.avinash.paypay.test.currencyconverter.viewintent.CurrencyIntent
 import com.avinash.paypay.test.currencyconverter.viewmodel.CurrencyViewModel
 import com.avinash.paypay.test.currencyconverter.viewstate.CurrencyState
+import com.avinash.paypay.test.currencyconverter.worker.CurrencyWorker
+import com.avinash.paypay.test.foundation.environment.AppInfo
+import java.util.concurrent.TimeUnit
 
 /**
  * Fragment which displays the currency converter sections.
@@ -30,6 +39,8 @@ class HomeFragment: IBaseFragment<FragmentHomeBinding,
 
     // Sharing the same view model for fragments residing in the same activity
     override val viewModel by activityViewModels<CurrencyViewModel>()
+
+    private var workManager: WorkManager? = null
 
     override fun setViewBinding(
         inflater: LayoutInflater,
@@ -60,6 +71,8 @@ class HomeFragment: IBaseFragment<FragmentHomeBinding,
                 // Not Required
             }
         })
+
+        viewBinding.appVersion.text = resources.getString(R.string.app_version_text, AppInfo.version().name)
     }
 
     /**
@@ -95,16 +108,58 @@ class HomeFragment: IBaseFragment<FragmentHomeBinding,
         viewBinding.progressCircular.visibility = View.GONE
         viewBinding.currencyContainer.visibility = View.VISIBLE
 
-        if (!selectedCurrency?.currencyCode.isNullOrBlank()) {
+        val currencyCode = selectedCurrency?.currencyCode
+        val currencyValue = selectedCurrency?.currencyValue
+        if (!currencyCode.isNullOrBlank()) {
             viewBinding.selectedCurrencyCode.text = selectedCurrency?.currencyCode
+            if (currencyValue != null) {
+                viewBinding.conversionRate.text = resources.getString(
+                    R.string.equivalent_amount_message,
+                    "$currencyValue $currencyCode"
+                )
+            }
         }
 
         if (!sourceCurrency?.currencyCode.isNullOrBlank()) {
             viewBinding.sourceCurrencyCode.text = sourceCurrency?.currencyCode
         }
+
+        enqueueWorkRequest()
+    }
+
+    /**
+     * Schedule periodic job for fetching currency live rate and update it in our database
+     */
+    private fun enqueueWorkRequest() {
+        workManager = WorkManager.getInstance(requireContext())
+
+        // Create Network constraint
+        val constraints: Constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+
+        // Create periodic work request
+        val periodicSyncDataWork =
+            PeriodicWorkRequest.Builder(CurrencyWorker::class.java, 30, TimeUnit.MINUTES)
+                .setConstraints(constraints) // setting a backoff on case the work needs to retry
+                .setBackoffCriteria(
+                    BackoffPolicy.LINEAR,
+                    PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
+                    TimeUnit.MILLISECONDS
+                )
+                .build()
+
+        // Enqueue periodic work request
+        workManager?.enqueueUniquePeriodicWork(
+            SYNC_DATA_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,  //Existing Periodic Work policy
+            periodicSyncDataWork //work request
+        )
     }
 
     companion object {
         private const val EDIT_TEXT_LENGTH_FILTER = 9
+        private const val SYNC_DATA_WORK_NAME = "Currency_Sync_Job"
     }
 }

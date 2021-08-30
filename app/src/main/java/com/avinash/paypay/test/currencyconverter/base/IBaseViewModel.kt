@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avinash.paypay.test.foundation.environment.AppInfo
 import com.avinash.paypay.test.foundation.logging.Log
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -40,7 +39,7 @@ abstract class IBaseViewModel<INTENT : ViewIntent, STATE : ViewState> : ViewMode
     }
 
     fun updateLiveData(state: STATE) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch {
             mutableLiveData.value = state
         }
     }

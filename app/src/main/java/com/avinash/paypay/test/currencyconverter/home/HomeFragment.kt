@@ -60,7 +60,7 @@ class HomeFragment: IBaseFragment<FragmentHomeBinding,
                 // Not required
             }
 
-            override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
                 val textValue = if (!text.isNullOrBlank()) {
                     text.toString()
                 } else ""

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_navigation"
+    app:startDestination="@+id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.avinash.paypay.test.currencyconverter.home.HomeFragment"
+        tools:layout="@layout/fragment_home"
+        android:label="Home">
+        <action
+            android:id="@+id/action_homeFragment_to_selectionFragment"
+            app:destination="@id/countrySelectionFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/countrySelectionFragment"
+        android:name="com.avinash.paypay.test.currencyconverter.supportedcountries.CountriesFragment"
+        tools:layout="@layout/fragment_country_selection"
+        android:label="Select Country" />
+
+</navigation>
